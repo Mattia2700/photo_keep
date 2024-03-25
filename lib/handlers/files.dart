@@ -1,29 +1,26 @@
 import 'package:photo_manager/photo_manager.dart';
 
-Future<List<AssetPathEntity>> getPhotosFolders() async {
+Future<List<AssetPathEntity>> getFolders() async {
   final PermissionState ps = await PhotoManager.requestPermissionExtend();
   List<AssetPathEntity> albums = [];
 
   if (ps.isAuth) {
-    print('Permission granted');
     // get all albums on device
-     albums = await PhotoManager.getAssetPathList(
+    albums = await PhotoManager.getAssetPathList(
       type: RequestType.image,
       hasAll: false,
     );
+  } else {
+    PhotoManager.openSetting();
   }
+
+  albums.sort((a, b) => a.name.compareTo(b.name));
 
   return albums;
 }
 
-// Future<List<String>> getDisplayedFolderNames(Future<List<Directory>> folders) async {
-//   List<String> folderNames = [];
-//
-//   for (var folder in await folders) {
-//     folderNames.add(folder.path.split('/').last);
-//   }
-//
-//   print(folderNames);
-//
-//   return folderNames;
-// }
+Future<List<AssetEntity>> getImages(AssetPathEntity album) async {
+  final List<AssetEntity> images =
+      await album.getAssetListRange(start: 0, end: await album.assetCountAsync);
+  return images;
+}

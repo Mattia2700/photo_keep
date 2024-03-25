@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'PhotoKeep'),
     );
   }
 }
@@ -58,24 +58,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  late final Future<List<AssetPathEntity>> folders;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    folders = getFolders();
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final Future<List<AssetPathEntity>> folders = getPhotosFolders();
-
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -95,45 +87,44 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          // insert a text for each folder with future builder
-          children: <Widget>[
-            FutureBuilder<List<AssetPathEntity>>(
-              future: folders,
-              builder: (BuildContext context, AsyncSnapshot<List<AssetPathEntity>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else {
-                  return Column(
-                    children: snapshot.data!.map((AssetPathEntity folder) {
-                      return Text(folder.name);
-                    }).toList(),
-                  );
-                }
-              },
-            ),
-          ],
+        child: FutureBuilder<List<AssetPathEntity>>(
+          future: folders,
+          builder: (BuildContext context,
+              AsyncSnapshot<List<AssetPathEntity>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else {
+              // create grid view with text for each folder
+              return CustomScrollView(slivers: <Widget>[
+                SliverPadding(
+                    padding: const EdgeInsets.all(20.0),
+                    sliver: SliverGrid.count(
+                      crossAxisSpacing: 10.0,
+                      mainAxisSpacing: 10.0,
+                      crossAxisCount: 2,
+                      children: _getContainers(snapshot.data!),
+                    )),
+              ]);
+            }
+          },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  _getContainers(List<AssetPathEntity> folders) {
+    var widgets = <Widget>[];
+    var color = Colors.grey[300];
+    for (final AssetPathEntity folder in folders) {
+      var cont = Container(
+        padding: const EdgeInsets.all(8.0),
+        color: color,
+        child: Center(
+          child: Text(folder.name),
+        ),
+      );
+      widgets.add(cont);
+    }
+    return widgets;
   }
 }
