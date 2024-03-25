@@ -117,10 +117,20 @@ class _MyHomePageState extends State<MyHomePage> {
     var color = Colors.grey[300];
     for (final AssetPathEntity folder in folders) {
       var cont = Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         color: color,
-        child: Center(
-          child: Text(folder.name),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Image.asset('assets/frame.jpg'),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 5),
+              child: Text(folder.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+            )
+          ],
         ),
       );
       widgets.add(cont);
