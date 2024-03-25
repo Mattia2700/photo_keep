@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
+
+import 'handlers/files.dart';
 
 void main() {
   runApp(const MyApp());
@@ -70,6 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final Future<List<AssetPathEntity>> folders = getPhotosFolders();
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -104,13 +110,21 @@ class _MyHomePageState extends State<MyHomePage> {
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
+          // insert a text for each folder with future builder
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            FutureBuilder<List<AssetPathEntity>>(
+              future: folders,
+              builder: (BuildContext context, AsyncSnapshot<List<AssetPathEntity>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else {
+                  return Column(
+                    children: snapshot.data!.map((AssetPathEntity folder) {
+                      return Text(folder.name);
+                    }).toList(),
+                  );
+                }
+              },
             ),
           ],
         ),
