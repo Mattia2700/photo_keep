@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:photo_keep/widgets/list.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../handlers/files.dart';
@@ -35,20 +36,12 @@ class MyPhotosPage extends StatefulWidget {
 
 class _MyPhotosPageState extends State<MyPhotosPage> {
   late final Future<List<AssetEntity>> images;
-  late final ScrollController _scrollController;
-  final _padding = 20.0;
-  final _spacing = 10.0;
-  double? _tileHeight;
   double? _viewportHeight;
-  int? _scrollIndex = 0;
-  int? _tilesPerColumn;
-  int _tilePerRow = 3;
 
   @override
   void initState() {
     super.initState();
     images = getImages(widget.folder);
-    _scrollController = ScrollController()..addListener(_scrollListener);
   }
 
   @override
@@ -68,43 +61,10 @@ class _MyPhotosPageState extends State<MyPhotosPage> {
                 return const CircularProgressIndicator();
               } else {
                 // create grid view with text for each folder
-                return LayoutBuilder(builder: (context, constraints) {
-                  _viewportHeight ??= constraints.maxHeight;
-                  return CustomScrollView(
-                      controller: _scrollController,
-                      slivers: <Widget>[
-                        SliverPadding(
-                            padding: EdgeInsets.all(_padding),
-                            sliver: SliverGrid.count(
-                              crossAxisSpacing: _spacing,
-                              mainAxisSpacing: _spacing,
-                              crossAxisCount: _tilePerRow,
-                              children: _getContainers(snapshot.data!),
-                            )),
-                      ]);
-                });
+                return PartialGrid(imagePaths: snapshot.data!);
               }
             });
       })),
     );
-  }
-
-  _getContainers(List<AssetEntity> images) {
-    var widgets = <Widget>[];
-    for (final (currentIndex, AssetEntity image) in images.indexed) {
-      var cont = LayoutBuilder(builder: (context, constraints) {
-        _tileHeight ??= constraints.maxHeight;
-        _tilesPerColumn ??= ((_viewportHeight! - _padding) / (_tileHeight! + _spacing)).ceil();
-        print('Tile height: $_tileHeight');
-        return ImageTile(
-            image: image, tilesPerColumn: _tilesPerColumn, tilesPerRow: _tilePerRow, index: _scrollIndex, currentIndex: currentIndex);
-      });
-      widgets.add(cont);
-    }
-    return widgets;
-  }
-
-  _scrollListener() {
-    _scrollIndex = (_scrollController.position.pixels / _tileHeight!).ceil();
   }
 }

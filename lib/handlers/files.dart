@@ -24,3 +24,7 @@ Future<List<AssetEntity>> getImages(AssetPathEntity album) async {
       await album.getAssetListRange(start: 0, end: await album.assetCountAsync);
   return images;
 }
+
+Future<AssetEntity> getFirstImage(AssetPathEntity album) async{
+  return await album.getAssetListRange(start: 0, end: 1).then((value) => value.first);
+}

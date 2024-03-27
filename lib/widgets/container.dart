@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:photo_keep/handlers/files.dart';
 import 'package:photo_keep/views/photos.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -27,16 +28,38 @@ class AlbumTileState extends State<AlbumTile> {
       // splashColor: Colors.grey[400],
       // splashFactory: InkRipple.splashFactory,
       child: Ink(
-        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+        padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
         color: _isPressed ? Colors.grey[400] : Colors.grey[300],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
-              child: Image.asset('assets/frame.jpg'),
+              child: FutureBuilder<AssetEntity>(
+                future: getFirstImage(widget.folder),
+                builder: (BuildContext context,
+                    AsyncSnapshot<AssetEntity> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else {
+                    return AspectRatio(
+                      aspectRatio: 1.15,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetEntityImageProvider(snapshot.data!,
+                                isOriginal: false,
+                                thumbnailSize: const ThumbnailSize(200, 200)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
             Padding(
-                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                padding: const EdgeInsets.only(top: 3),
                 child: Text(widget.folder.name,
                     style: const TextStyle(fontWeight: FontWeight.bold))),
           ],
@@ -63,27 +86,16 @@ class AlbumTileState extends State<AlbumTile> {
   }
 }
 
-class ImageTile extends StatefulWidget {
+class ImageTile extends StatelessWidget {
+  final bool _isPressed = false;
   final AssetEntity image;
-  final int? tilesPerColumn;
-  final int tilesPerRow;
-  final int? index;
-  final int currentIndex;
 
-  const ImageTile(
-      {super.key,
-      required this.image,
-      required this.tilesPerColumn,
-      required this.tilesPerRow,
-      required this.index,
-      required this.currentIndex});
+  // final int? tilesPerColumn;
+  // final int tilesPerRow;
+  // final int? index;
+  // final int currentIndex;
 
-  @override
-  ImageTileState createState() => ImageTileState();
-}
-
-class ImageTileState extends State<ImageTile> {
-  bool _isPressed = false;
+  const ImageTile({super.key, required this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -94,59 +106,30 @@ class ImageTileState extends State<ImageTile> {
       // splashColor: Colors.grey[400],
       // splashFactory: InkRipple.splashFactory,
       child: Ink(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
         color: _isPressed ? Colors.grey[400] : Colors.grey[300],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Expanded(
-              child: _getImage(),
-            ),
-            // Padding(
-            //   padding: const EdgeInsets.only(top: 5, bottom: 5),
-            //   child: Text(
-            //     widget.image.title!,
-            //     overflow: TextOverflow.ellipsis,
-            //   ),
+            AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetEntityImageProvider(image,
+                          isOriginal: false,
+                          thumbnailSize: const ThumbnailSize(200, 200)),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )),
+            // Text(
+            //   image.title!,
+            //   overflow: TextOverflow.ellipsis,
             // ),
           ],
         ),
       ),
     );
   }
-
-  _getImage() {
-    print(widget.tilesPerRow);
-    print(widget.tilesPerColumn);
-    print(widget.index);
-    print(widget.currentIndex);
-    if (widget.index != null && widget.tilesPerColumn != null) {
-      final val = (widget.currentIndex) - (widget.index! * widget.tilesPerRow);
-      if ( val >= 0 && val < (widget.tilesPerRow * widget.tilesPerColumn!)) {
-        print("show image");
-        return AssetEntityImage(widget.image, width: 100, height: 100, thumbnailSize: const ThumbnailSize(100, 100));
-      }
-    }
-    return Image.asset('assets/frame.jpg');
-  }
-
-// _onPressed() {
-//   setState(() {
-//     _isPressed = true;
-//   });
-//   if (widget.folder != null) {
-//     Navigator.of(context).push(
-//       MaterialPageRoute(builder:
-//           (context) => Photos(folder: widget.folder!),
-//       ),
-//
-//     );
-//   }
-// }
-//
-// _onReleased() {
-//   setState(() {
-//     _isPressed = false;
-//   });
-// }
 }
