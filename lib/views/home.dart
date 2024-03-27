@@ -54,7 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
               return const CircularProgressIndicator();
             } else {
               // create grid view with text for each folder
-              return CustomScrollView(slivers: <Widget>[
+              return CustomScrollView(
+                slivers: <Widget>[
                 SliverPadding(
                     padding: const EdgeInsets.all(20.0),
                     sliver: SliverGrid.count(
